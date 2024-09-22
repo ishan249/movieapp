@@ -5,10 +5,11 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
+  ScrollView,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import styles from "../css/styles"; // Assuming your styles file
-
+import { genreData } from "../helper/constants/genre";
 const MoodInputScreen = () => {
   const {
     control,
@@ -16,64 +17,92 @@ const MoodInputScreen = () => {
     formState: { errors },
   } = useForm();
   const [selectedTags, setSelectedTags] = useState([]);
-  const tags = ["Happy", "Sad", "Anxious", "Excited", "Relaxed"];
+
+  // Object with emojis and tag names
+  const tagsWithEmojis = [
+    { name: "Happy", emoji: "😊" },
+    { name: "Sad", emoji: "😢" },
+    { name: "Anxious", emoji: "😟" },
+    { name: "Excited", emoji: "🤩" },
+    { name: "Relaxed", emoji: "😌" },
+  ];
+
   const onSubmit = (data) => {
     console.log(data.mood, "se", selectedTags);
   };
 
-  const toggleTag = (tag) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tag)); // Remove tag if already selected
+  const toggleTag = (tagName) => {
+    if (selectedTags.includes(tagName)) {
+      setSelectedTags(selectedTags.filter((t) => t !== tagName)); // Remove tag if already selected
     } else {
-      setSelectedTags([...selectedTags, tag]); // Add tag if not selected
+      setSelectedTags([...selectedTags, tagName]); // Add tag if not selected
     }
   };
-  return (
-    <View style={styles.container}>
-      <Controller
-        control={control}
-        name="mood"
-        rules={{ required: `Please enter how you're feeling.` }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            placeholder="How are you feeling today?"
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
-            style={styles.input}
-          />
-        )}
-      />
 
-      {/* Show validation error message */}
-      {errors.mood && (
-        <Text style={styles.validationMessage}>{errors.mood.message}</Text>
-      )}
-
-      <FlatList
-        data={tags}
-        keyExtractor={(item) => item}
-        horizontal
-        renderItem={({ item }) => (
+  const renderCategory = (categoryName, data) => (
+    <React.Fragment key={categoryName}>
+      <Text style={styles.categoryTitle}>{categoryName}</Text>
+      <View style={styles.tagContainer}>
+        {data.map((item) => (
           <TouchableOpacity
+            key={item.name}
             style={[
               styles.tag,
-              selectedTags.includes(item)
+              selectedTags.includes(item.name)
                 ? styles.selectedTag
                 : styles.unselectedTag,
             ]}
-            onPress={() => toggleTag(item)}
+            onPress={() => toggleTag(item.name)}
           >
-            <Text
-              style={{
-                color: selectedTags.includes(item) ? "white" : "black", // Conditional text color
-              }}
-            >
-              {item}
+            <Text style={{ color: "white" }}>
+              {item.emoji} {item.name}
             </Text>
           </TouchableOpacity>
+        ))}
+      </View>
+    </React.Fragment>
+  );
+  
+
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Text style={[styles.labels, { fontSize: 18 }]}>Describe</Text>
+
+        <Controller
+          control={control}
+          name="mood"
+          rules={{ required: `Please enter how you're feeling.` }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              placeholder="How are you feeling today?"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              placeholderTextColor={"#ccc"}
+              style={styles.input}
+            />
+          )}
+        />
+
+        {/* Show validation error message */}
+        {errors.mood && (
+          <Text style={styles.validationMessage}>{errors.mood.message}</Text>
         )}
-      />
+
+        {/* OR Section */}
+        <View style={styles.orContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>OR</Text>
+          <View style={styles.line} />
+        </View>
+
+        <Text style={[styles.labels, { fontSize: 18 }]}>Select Genre</Text>
+
+        {Object.entries(genreData).map(([categoryName, data]) =>
+          renderCategory(categoryName, data)
+        )}
+      </ScrollView>
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
         <Text style={styles.buttonText}>Submit</Text>
