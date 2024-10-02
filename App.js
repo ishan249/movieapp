@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useFonts } from "expo-font";
 import { StatusBar } from "react-native"; // Import StatusBar component
 import MoodInputScreen from "./screens/MoodInputScreen";
+import MovieListScreen from "./screens/MovieListScreen";
 
 const Stack = createStackNavigator();
 
@@ -51,7 +52,28 @@ export default function App() {
             // #ff8000 - green
             // #40bcf4 - light-blue
           />
+          <Stack.Screen
+          name="MovieListScreen"
+          component={MovieListScreen}
+          options={{
+            title: "Movie List",
+            headerStyle: {
+              backgroundColor: "#14181c",
+              borderBottomWidth: 1,
+              borderBottomColor: "#14181c",
+            },
+            headerTintColor: "#fff", // White text for header
+            headerTitleStyle: {
+              fontWeight: "semibold",
+              fontFamily: "Inter-Regular",
+            },
+            cardStyle: {
+              backgroundColor: "#14181c", // Black background for the screen
+            },
+          }}
+        />
         </Stack.Navigator>
+        
       </NavigationContainer>
     </>
   );

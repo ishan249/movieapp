@@ -10,6 +10,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import styles from "../css/styles"; // Assuming your styles file
 import { genreData } from "../helper/constants/genre";
+import { useNavigation } from "@react-navigation/native";
 const MoodInputScreen = () => {
   const {
     control,
@@ -17,7 +18,9 @@ const MoodInputScreen = () => {
     formState: { errors },
   } = useForm();
   const [selectedTags, setSelectedTags] = useState([]);
+  const [loading, setLoading] = useState([]);
 
+  const navigation = useNavigation();
   // Object with emojis and tag names
   const tagsWithEmojis = [
     { name: "Happy", emoji: "😊" },
@@ -27,8 +30,27 @@ const MoodInputScreen = () => {
     { name: "Relaxed", emoji: "😌" },
   ];
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log(data.mood, "se", selectedTags);
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `${
+          process.env.EXPO_PUBLIC_API_URL
+        }/movies?limit=5?genre=${selectedTags.join(",")}&sort=title&order=asc`
+      );
+
+      const movieData = await response.json();
+      console.log(movieData);
+      setLoading(false);
+
+      // Navigate to MovieListScreen and pass the movie data
+      navigation.navigate("MovieListScreen", { movies: movieData });
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+      setLoading(false);
+    }
   };
 
   const toggleTag = (tagName) => {
@@ -62,7 +84,6 @@ const MoodInputScreen = () => {
       </View>
     </React.Fragment>
   );
-  
 
   return (
     <View style={styles.container}>
